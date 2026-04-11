@@ -567,7 +567,7 @@
     </div>
 
     <!-- Socket.io -->
-    <script src="/socket.io/socket.io.js"></script>
+        <script src="https://buzzer-server-qaf.up.railway.app/socket.io/socket.io.js"></script>
     <script>
         let socket;
         let currentRoom = '';
@@ -636,7 +636,7 @@
             document.getElementById('discOverlay').style.display = 'flex';
 
             return new Promise((resolve) => {
-                socket = io({ reconnectionAttempts: 5 });
+                                socket = io('https://buzzer-server-qaf.up.railway.app', { reconnectionAttempts: 5 });
                 socket.on('connect', () => {
                     document.getElementById('discOverlay').style.display = 'none';
 
