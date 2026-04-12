@@ -9,7 +9,8 @@ const io = new Server(server, {
     cors: { origin: '*' }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => { res.setHeader("Content-Security-Policy", "default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';"); next(); });
+ app.use(express.static(path.join(__dirname, 'public')));;
 
 // ===== Application State =====
 // rooms: rootMap -> roomCode -> Object
