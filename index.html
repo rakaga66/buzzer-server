@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>جرس الفرق - حروف</title>
+    <style>
+        @font-face {
+            font-family: 'HrofFont';
+            src: url('حروف.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-grad-1: #2a1050;
+            --bg-grad-2: #5c2b99;
+            --yellow: #FFD600;
+            --orange: #FF8C00;
+            --card-bg: rgba(255,255,255,0.08);
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'HrofFont', 'Cairo', sans-serif;
+            background: linear-gradient(160deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            color: var(--white);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow {
+            position: absolute;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(123,63,190,0.5) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -100px; left: -100px;
+            pointer-events: none; z-index: 0;
+        }
+        .glow:nth-child(2) {
+            top: auto; bottom: -150px; right: -100px;
+            background: radial-gradient(circle, rgba(255,214,0,0.15) 0%, transparent 70%);
+        }
+
+        .container {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 500px;
+            padding: 24px 20px;
+            display: flex; flex-direction: column; gap: 20px;
+            min-height: 100vh;
+        }
+
+        /* ===== LOGIN ===== */
+        #loginScreen {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            flex: 1; gap: 30px;
+            animation: popIn 0.4s ease;
+        }
+
+        .logo-hroof {
+            font-family: 'HrofFont', sans-serif;
+            font-size: 4rem; color: var(--yellow);
+            -webkit-text-stroke: 2px #1a1a1a; line-height: 1;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .logo-sub {
+            font-family: 'HrofFont', sans-serif;
+            font-size: 2rem; color: var(--orange);
+            -webkit-text-stroke: 1px #1a1a1a; margin-top: -10px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 30px 24px;
+            width: 100%; backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .input-grp { display: flex; flex-direction: column; gap: 8px; }
+        .input-grp label { font-weight: 700; font-size: 0.95rem; color: rgba(255,255,255,0.9); padding-right: 4px; }
+
+        .inp-field {
+            width: 100%; padding: 16px 20px;
+            border-radius: 16px;
+            font-family: 'HrofFont', sans-serif; font-size: 1.1rem; font-weight: 700;
+            background: rgba(0,0,0,0.25); color: var(--white); outline: none;
+            border: 1px solid rgba(255,255,255,0.1); transition: border-color 0.2s;
+        }
+        .inp-field:focus { border-color: var(--yellow); }
+
+        .team-select { display: flex; gap: 12px; }
+        .team-opt {
+            flex: 1; padding: 14px; border-radius: 14px;
+            border: 2px solid transparent; background: rgba(0,0,0,0.2);
+            color: #fff; font-family: 'HrofFont', sans-serif; font-weight: 800;
+            font-size: 1rem; cursor: pointer; transition: all 0.2s;
+        }
+        .team-opt[data-team="team1"].active { background: rgba(255,152,0,0.2); border-color: var(--orange); color: var(--orange); }
+        .team-opt[data-team="team2"].active { background: rgba(139,95,191,0.2); border-color: #ba8fed; color: #ba8fed; }
+
+        .join-btn {
+            width: 100%; padding: 18px; border: none; border-radius: 16px;
+            background: linear-gradient(135deg, var(--yellow), var(--orange));
+            color: #1a1a1a; font-family: 'HrofFont', sans-serif;
+            font-size: 1.3rem; font-weight: 900; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255,214,0,0.3); margin-top: 10px;
+            transition: transform 0.1s;
+        }
+        .join-btn:active { transform: scale(0.98); }
+
+        /* ===== MAIN SCREEN ===== */
+        #mainScreen {
+            display: none; flex-direction: column; align-items: center;
+            flex: 1; gap: 16px; width: 100%;
+            padding-top: 10px; padding-bottom: 20px;
+        }
+
+        .top-card {
+            background: var(--card-bg); border-radius: 20px; padding: 20px;
+            width: 100%; text-align: center; backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .room-badge {
+            display: inline-block; background: rgba(255,255,255,0.15);
+            padding: 6px 16px; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 800; letter-spacing: 1px; margin-top: 10px;
+        }
+
+        .player-card {
+            background: var(--card-bg); border-radius: 20px; padding: 24px;
+            width: 100%; text-align: center; backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.05);
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+        }
+
+        .pc-label { font-size: 1rem; font-weight: 800; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+        .pc-name { font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 16px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+        .team-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 16px; border-radius: 50px;
+            font-weight: 700; font-size: 0.95rem; background: rgba(0,0,0,0.3);
+        }
+        .team-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        .instruction { font-size: 0.95rem; color: rgba(255,255,255,0.8); line-height: 1.5; margin-top: 24px; margin-bottom: auto; }
+
+        /* ===== HEX BUZZER ===== */
+        .hex-buzzer-wrap {
+            position: relative; width: 250px; height: 280px;
+            margin-top: 20px; margin-bottom: 20px;
+            transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+            cursor: pointer; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+        }
+        .hex-buzzer-wrap:active { transform: scale(0.95); filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
+
+        .hex-bg {
+            width: 100%; height: 100%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            background: linear-gradient(180deg, var(--orange) 0%, #D84315 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; transition: background 0.3s;
+        }
+        .hex-bg.team2 { background: linear-gradient(180deg, #ba8fed 0%, #4A2570 100%); }
+        .hex-bg::after {
+            content: ''; position: absolute; inset: 4px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hex-icon { font-size: 3rem; margin-bottom: -5px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .hex-text { font-family: 'HrofFont', sans-serif; font-size: 3.5rem; color: #fff; line-height: 1; -webkit-text-stroke: 1.5px rgba(0,0,0,0.2); text-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .hex-sub { font-size: 0.9rem; font-weight: 700; opacity: 0.9; margin-top: 5px; }
+
+        .locked .hex-bg { background: #555 !important; filter: grayscale(1); }
+        .locked { cursor: not-allowed; opacity: 0.7; }
+        .locked:active { transform: none; }
+
+        .btn-secondary {
+            width: 100%; padding: 16px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; color: #fff; font-family: 'HrofFont', sans-serif;
+            font-weight: 700; font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-secondary:active { background: rgba(255,255,255,0.15); }
+
+        /* ===== TOAST ===== */
+        #toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--yellow); color: #1a1a1a;
+            padding: 14px 24px; border-radius: 50px;
+            font-weight: 800; font-size: 1rem;
+            transition: transform 0.4s cubic-bezier(0.34,1.2,0.64,1);
+            z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.3); white-space: nowrap;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.error { background: #E53935; color: #fff; }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: var(--yellow);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+
+<body>
+
+    <div class="glow"></div>
+    <div class="glow"></div>
+
+    <div id="toast"></div>
+
+    <div class="container">
+
+        <!-- LOGIN SCREEN -->
+        <div id="loginScreen">
+            <div style="text-align:center;">
+                <div class="logo-hroof">حروف</div>
+                <div class="logo-sub">جرس الفرق</div>
+            </div>
+
+            <div class="login-card">
+                <div style="font-size:0.95rem; color:rgba(255,255,255,0.8); text-align:center; margin-bottom:10px;">
+                    ادخل بياناتك، اختر فريقك، وابقَ جاهزاً للحظة الحسم.
+                </div>
+
+                <div class="input-grp" id="roomCodeGrp">
+                    <label>كود الجلسة</label>
+                    <input type="text" id="roomInput" class="inp-field" placeholder="مثال: ABC123" maxlength="10" style="text-transform:uppercase;">
+                </div>
+
+                <div class="input-grp">
+                    <label>اسم اللاعب</label>
+                    <input type="text" id="nameInput" class="inp-field" placeholder="اسمك" maxlength="20">
+                </div>
+
+                <div class="input-grp">
+                    <label>اختر فريقك</label>
+                    <div class="team-select">
+                        <button class="team-opt active" data-team="team1" onclick="selectTeam('team1')">الفريق الأول 🟠</button>
+                        <button class="team-opt"        data-team="team2" onclick="selectTeam('team2')">الفريق الثاني 🟣</button>
+                    </div>
+                </div>
+
+                <button class="join-btn" onclick="joinRoom()">دخول الجرس</button>
+            </div>
+        </div>
+
+        <!-- MAIN SCREEN -->
+        <div id="mainScreen">
+
+            <div class="top-card">
+                <div class="logo-hroof" style="font-size:2.5rem;">حروف</div>
+                <div class="room-badge" id="displayRoomCode">جلسة ----</div>
+            </div>
+
+            <div class="player-card">
+                <div class="pc-label">اللاعب</div>
+                <div class="pc-name" id="displayMyName">----</div>
+
+                <div class="team-badge">
+                    <span id="displayMyTeamName">الفريق الأول</span>
+                    <span class="team-dot" id="displayMyTeamDot" style="background:var(--orange);"></span>
+                </div>
+
+                <div class="instruction">
+                    اضغط فور معرفتك للإجابة.<br>إذا قُفل الجرس فانتظر إعادة التفعيل من المقدم.
+                </div>
+
+                <div class="hex-buzzer-wrap" id="buzzerWrap" onclick="pressBuzzer()">
+                    <div class="hex-bg" id="buzzerBg">
+                        <div class="hex-icon">👆</div>
+                        <div class="hex-text">اضغط</div>
+                        <div class="hex-sub" id="buzzerSub">جاهز</div>
+                    </div>
+                </div>
+
+                <button class="btn-secondary" onclick="leaveRoom()">
+                    <span>✏️</span> تغيير الاسم أو الفريق
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp }                                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getDatabase, ref, set, update, onValue, runTransaction, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+        // ── Firebase Config ──────────────────────────────────────────────────
+        const firebaseConfig = {
+            apiKey:            "AIzaSyCV2ZAVYhMbzgVFPmNtooCHR6C4aMOE3A",
+            authDomain:        "buzzer-game-f2983.firebaseapp.com",
+            databaseURL:       "https://buzzer-game-f2983-default-rtdb.firebaseio.com",
+            projectId:         "buzzer-game-f2983",
+            storageBucket:     "buzzer-game-f2983.firebasestorage.app",
+            messagingSenderId: "125573747954",
+            appId:             "1:125573747954:web:8dac681836e326b8b2c6b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db  = getDatabase(app);
+
+        // ── State ────────────────────────────────────────────────────────────
+        let currentRoom = '';
+        let myName      = '';
+        let myTeam      = 'team1';
+        let myId        = '';
+        let buzzerLocked = false;
+        let team1Name   = 'الفريق الأول';
+        let team2Name   = 'الفريق الثاني';
+
+        function genId() { return Math.random().toString(36).substr(2, 9) + Date.now().toString(36); }
+
+        // ── Read URL Params ──────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            const p = new URLSearchParams(window.location.search);
+            const room = p.get('room');
+            const name = p.get('name');
+            const team = p.get('team');
+            const t1   = p.get('team1');
+            const t2   = p.get('team2');
+
+            if (t1) { team1Name = t1; document.querySelector('.team-opt[data-team="team1"]').textContent = t1 + ' 🟠'; }
+            if (t2) { team2Name = t2; document.querySelector('.team-opt[data-team="team2"]').textContent = t2 + ' 🟣'; }
+
+            if (room) {
+                document.getElementById('roomInput').value = room.toUpperCase();
+                document.getElementById('roomCodeGrp').style.display = 'none';
+            }
+            if (name) document.getElementById('nameInput').value = name;
+            if (team === 'team1' || team === 'team2') selectTeam(team);
+
+            // Auto-join if all present
+            if (room && name && team) setTimeout(() => joinRoom(), 300);
+        });
+
+        // ── Join Room ────────────────────────────────────────────────────────
+        window.joinRoom = function () {
+            const rc = document.getElementById('roomInput').value.trim().toUpperCase();
+            const nm = document.getElementById('nameInput').value.trim();
+
+            if (!rc) return showToast('⚠️ أدخل كود الجلسة أولاً', true);
+            if (!nm) return showToast('⚠️ يرجى إدخال اسمك', true);
+
+            currentRoom = rc;
+            myName      = nm;
+            myId        = genId();
+
+            const playerRef = ref(db, `rooms/${rc}/players/${myId}`);
+            set(playerRef, { name: nm, team: myTeam, joinedAt: Date.now() })
+                .then(() => {
+                    showMainScreen();
+                    listenToRoom(rc);
+                    // Clean up on page leave
+                    window.addEventListener('beforeunload', () => remove(playerRef));
+                })
+                .catch(err => showToast('❌ ' + err.message, true));
+        };
+
+        function showMainScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainScreen').style.display  = 'flex';
+            document.getElementById('displayRoomCode').textContent = 'جلسة ' + currentRoom;
+            document.getElementById('displayMyName').textContent   = myName;
+
+            const isT1 = myTeam === 'team1';
+            document.getElementById('displayMyTeamName').textContent = isT1 ? team1Name : team2Name;
+            document.getElementById('displayMyTeamDot').style.background = isT1 ? 'var(--orange)' : '#ba8fed';
+            const bBg = document.getElementById('buzzerBg');
+            if (isT1) bBg.classList.remove('team2'); else bBg.classList.add('team2');
+
+            if ('vibrate' in navigator) navigator.vibrate(50);
+        }
+
+        // ── Listen to Room State (Real-Time) ─────────────────────────────────
+        function listenToRoom(roomCode) {
+            const roomRef = ref(db, `rooms/${roomCode}`);
+
+            onValue(roomRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                const locked = data.locked || false;
+
+                if (locked !== buzzerLocked) {
+                    buzzerLocked = locked;
+                    updateBuzzerUI();
+                }
+
+                if (data.buzzer) {
+                    const isMe = (data.buzzer.id === myId);
+                    document.getElementById('buzzerSub').textContent = isMe ? 'انت الأسرع! ✅' : 'سبقك ' + data.buzzer.name;
+                    if (!isMe && 'vibrate' in navigator) navigator.vibrate(200);
+                } else if (!locked) {
+                    // Reset happened
+                    document.getElementById('buzzerSub').textContent = 'جاهز';
+                    if ('vibrate' in navigator) navigator.vibrate(50);
+                }
+            });
+        }
+
+        // ── Press Buzzer (First Press Wins via Transaction) ───────────────────
+        window.pressBuzzer = function () {
+            if (buzzerLocked) return;
+
+            const buzzerRef = ref(db, `rooms/${currentRoom}/buzzer`);
+
+            runTransaction(buzzerRef, (current) => {
+                if (current !== null) return; // already buzzed → abort
+                return { name: myName, team: myTeam, id: myId, time: Date.now() };
+            }).then(({ committed }) => {
+                if (committed) {
+                    // Lock the room
+                    update(ref(db, `rooms/${currentRoom}`), { locked: true });
+                    buzzerLocked = true;
+                    updateBuzzerUI();
+                    if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+                }
+                // If not committed → someone was faster (UI will update via listener)
+            });
+        };
+
+        // ── UI Helpers ───────────────────────────────────────────────────────
+        function updateBuzzerUI() {
+            const wrap = document.getElementById('buzzerWrap');
+            if (buzzerLocked) {
+                wrap.classList.add('locked');
+                if (document.getElementById('buzzerSub').textContent === 'جاهز') {
+                    document.getElementById('buzzerSub').textContent = 'مقفل 🔒';
+                }
+            } else {
+                wrap.classList.remove('locked');
+                document.getElementById('buzzerSub').textContent = 'جاهز';
+            }
+        }
+
+        window.showToast = function (msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            isError ? t.classList.add('error') : t.classList.remove('error');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        };
+
+        window.selectTeam = function (t) {
+            myTeam = t;
+            document.querySelectorAll('.team-opt').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.team-opt[data-team="${t}"]`).classList.add('active');
+        };
+
+        window.leaveRoom = function () { location.reload(); };
+    </script>
+
+</body>
+</html>
